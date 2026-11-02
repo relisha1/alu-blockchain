@@ -15,6 +15,11 @@ block_t *block_create(block_t const *prev, int8_t const *data,
 {
 	block_t *block;
 
+	if (!prev || (!data && data_len))
+		return (NULL);
+	if (data_len > BLOCKCHAIN_DATA_MAX)
+		data_len = BLOCKCHAIN_DATA_MAX;
+
 	block = calloc(1, sizeof(*block));
 	if (block == NULL)
 		return (NULL);

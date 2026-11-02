@@ -12,10 +12,10 @@
 
 #include <llist.h>
 
-#include "../crypto/hblk_crypto.h"
-#include "../blockchain/v0.3/blockchain.h"
-#include "../blockchain/v0.3/provided/provided.h"
-#include "../blockchain/v0.3/transaction/transaction.h"
+#include "hblk_crypto.h"
+#include "blockchain.h"
+#include "provided.h"
+#include "transaction.h"
 
 
 
@@ -116,26 +116,15 @@ int cli_exit(state_t *state);
 int cli_help(state_t *state);
 
 /* cli_info.c */
-static int sum_unspent_amounts(void *node,
-			       unsigned int idx __attribute__((unused)), void *arg);
 int cli_info(state_t *state);
 
 /* cli_load.c */
 int cli_load(state_t *state);
 
 /* cli_mine.c */
-static int transaction_is_invalid(llist_node_t node, void *arg);
-static int add_transaction(llist_node_t node,
-			   unsigned int idx __attribute__((unused)), void *arg);
-static unspent_tx_out_t *update_utxo(state_t *state, block_t *block,
-				     transaction_t *coinbase_tx);
-static int cli_mine_process(state_t *state, block_t *block,
-			    block_t *prev_block, transaction_t *coinbase_tx);
 int cli_mine(state_t *state);
 
 /* cli_save.c */
-static int handle_transaction_send(state_t *state, uint32_t amount,
-				   uint8_t pub[EC_PUB_LEN]);
 int cli_save(state_t *state);
 
 /* cli_send.c */

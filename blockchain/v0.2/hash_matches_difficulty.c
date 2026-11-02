@@ -11,23 +11,19 @@ int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH],
 
 uint32_t difficulty)
 {
-	uint32_t i, mod, byte, bit;
+	uint32_t i, mod, byte;
 
+	if (!hash || difficulty > SHA256_DIGEST_LENGTH * 8)
+		return (0);
 	mod = difficulty / 8;
 	byte = difficulty % 8;
-
 	for (i = 0; i < mod; i++)
 	{
 		if (hash[i] != 0)
 			return (0);
 	}
-	if (hash[mod] >> (8 - byte))
+	if (byte && (hash[mod] >> (8 - byte)))
 		return (0);
-	for (bit = 0; bit < (byte - 1); bit++)
-	{
-		if ((hash[mod] >> (7 - bit)) & 1)
-			return (0);
-	}
 	return (1);
 }
 

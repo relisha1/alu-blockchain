@@ -27,7 +27,7 @@
 int block_is_valid(block_t const *block, block_t const *prev_block)
 {
 	uint8_t hash_buf[SHA256_DIGEST_LENGTH] = {0};
-	block_t const _genesis = GENESIS_BLOCK;
+	static block_t const _genesis = GENESIS_BLOCK;
 
 	if (!block || (!prev_block && block->info.index != 0))
 		return (1);

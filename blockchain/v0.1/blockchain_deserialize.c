@@ -46,7 +46,7 @@ blockchain_t *blockchain_deserialize(char const *path)
 		return (CLEAN_UP, NULL);
 	CHECK_ENDIAN(size);
 	chain->chain = deserialize_blocks(fd, size, endianness);
-	if (!chain)
+	if (!chain->chain)
 		return (CLEAN_UP, NULL);
 	return (close(fd), chain);
 }

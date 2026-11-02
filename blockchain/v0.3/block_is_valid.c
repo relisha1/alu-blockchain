@@ -37,7 +37,7 @@ int block_is_valid(block_t const *block, block_t const *prev_block,
 	llist_t *all_unspent)
 {
 	uint8_t hash_buf[SHA256_DIGEST_LENGTH] = {0};
-	block_t const _genesis = GENESIS_BLOCK;
+	static block_t const _genesis = GENESIS_BLOCK;
 	validation_vistor_t visitor = {0};
 
 	if (!block || (!prev_block && block->info.index != 0))

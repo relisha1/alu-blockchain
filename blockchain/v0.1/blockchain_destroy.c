@@ -10,6 +10,8 @@ void blockchain_destroy(blockchain_t *blockchain)
 {
 	block_t *block, *tmp;
 
+	if (!blockchain)
+		return;
 	block = llist_pop(blockchain->chain);
 	while (block != NULL)
 	{

@@ -21,12 +21,34 @@ blocks with proof of work, UTXO transactions, and an interactive CLI.
 
 ## Build
 
+The ALX checker has the `llist` library installed system-wide. On your own
+machine or a Codespace, install the copy in `llist/` once:
+
+```sh
+sudo make -C llist install
+```
+
+Then:
+
 ```sh
 make          # builds every library and the CLI
 make clean    # removes build output
 ```
 
 Each folder also has its own Makefile, e.g. `make -C blockchain/v0.2`.
+
+## Run the v0.1 task tests
+
+From `blockchain/v0.1`, each task's test is in `test/`. For example:
+
+```sh
+cd blockchain/v0.1
+gcc -Wall -Wextra -Werror -pedantic -I. -o blockchain_create-test \
+    blockchain_create.c test/blockchain_create-main.c \
+    provided/_blockchain_print.c provided/_blockchain_destroy.c \
+    -L../../crypto -lhblk_crypto -lllist -lssl -lcrypto -pthread
+./blockchain_create-test
+```
 
 ## Run the CLI
 

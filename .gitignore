@@ -4,3 +4,5 @@ targets/
 cli/cli
 *.hblk
 blockchain/*/*-main
+*-test
+save.hblk

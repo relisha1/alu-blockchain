@@ -9,7 +9,8 @@ NAME = libhblk_blockchain.a
 SRC = blockchain_create.c block_create.c block_destroy.c \
       blockchain_destroy.c block_hash.c blockchain_serialize.c \
       blockchain_deserialize.c block_is_valid.c \
-      provided/endianness.c provided/_print_hex_buffer.c
+      provided/endianness.c provided/_print_hex_buffer.c \
+      provided/_blockchain_print.c
 OBJ = $(SRC:.c=.o)
 HDR = blockchain.h provided/provided.h provided/endianness.h
 

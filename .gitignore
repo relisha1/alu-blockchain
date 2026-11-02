@@ -3,3 +3,4 @@
 targets/
 cli/cli
 *.hblk
+blockchain/*/*-main

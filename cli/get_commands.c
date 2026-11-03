@@ -22,6 +22,9 @@ command_t const *get_commands(void)
 		{cli_send, SEND_NAME, SEND_HELP, SEND_DESC},
 		{cli_wallet_load, WALLET_LOAD_NAME, WALLET_LOAD_HELP, WALLET_LOAD_DESC},
 		{cli_wallet_save, WALLET_SAVE_NAME, WALLET_SAVE_HELP, WALLET_SAVE_DESC},
+		{cli_address, ADDRESS_NAME, ADDRESS_HELP, ADDRESS_DESC},
+		{cli_balance, BALANCE_NAME, BALANCE_HELP, BALANCE_DESC},
+		{cli_print, PRINT_NAME, PRINT_HELP, PRINT_DESC},
 		{NULL, NULL, NULL, NULL}
 	};
 

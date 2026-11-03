@@ -59,6 +59,18 @@
 #define WALLET_SAVE_HELP "wallet_save PATH"
 #define WALLET_SAVE_DESC "Save wallet to a file."
 
+#define ADDRESS_NAME "address"
+#define ADDRESS_HELP "address"
+#define ADDRESS_DESC "Display the public key (address) of your wallet."
+
+#define BALANCE_NAME "balance"
+#define BALANCE_HELP "balance"
+#define BALANCE_DESC "Display how many coins your wallet owns."
+
+#define PRINT_NAME "print"
+#define PRINT_HELP "print"
+#define PRINT_DESC "Display a short view of every block."
+
 
 
 /**
@@ -135,6 +147,15 @@ int cli_wallet_load(state_t *state);
 
 /* cli_wallet_save.c */
 int cli_wallet_save(state_t *state);
+
+/* cli_address.c */
+int cli_address(state_t *state);
+
+/* cli_balance.c */
+int cli_balance(state_t *state);
+
+/* cli_print.c */
+int cli_print(state_t *state);
 
 /* get_commands.c */
 command_t const *get_commands(void);

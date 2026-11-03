@@ -12,6 +12,7 @@ NAME = cli
 SRC = cli.c cli_exit.c cli_help.c cli_info.c cli_load.c cli_mine.c \
       cli_save.c cli_send.c cli_wallet_load.c cli_wallet_save.c \
       find_command.c get_commands.c state_clear.c state_init.c \
+      cli_address.c cli_balance.c cli_print.c \
       $(BC)/provided/_endianness.c
 OBJ = $(SRC:.c=.o)
 

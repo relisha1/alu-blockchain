@@ -63,29 +63,6 @@ static int add_outputs(llist_t *transactions,
 }
 
 /**
- * clear_inputs - remove the inputs of every transaction once they are spent
- *
- * @transactions: list of transactions
- */
-static void clear_inputs(llist_t *transactions)
-{
-	transaction_t *tx;
-	tx_in_t *in;
-	int i;
-
-	for (i = 0; i < llist_size(transactions); i++)
-	{
-		tx = llist_get_node_at(transactions, i);
-		in = llist_pop(tx->inputs);
-		while (in)
-		{
-			free(in);
-			in = llist_pop(tx->inputs);
-		}
-	}
-}
-
-/**
  * update_unspent - update the list of all unspent transaction outputs
  *
  * @transactions: list of validated transactions
@@ -127,7 +104,6 @@ llist_t *update_unspent(llist_t *transactions,
 		llist_destroy(new_list, 1, free);
 		return (NULL);
 	}
-	clear_inputs(transactions);
 	llist_destroy(all_unspent, 1, free);
 	return (new_list);
 }

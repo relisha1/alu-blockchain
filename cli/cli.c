@@ -99,6 +99,7 @@ int main(void)
 	while (1)
 	{
 		printf("%s", PROMPT);
+		fflush(stdout);
 		nread = getline(&state.line, &state.linesz, stdin);
 
 		if (nread < 1)
@@ -110,6 +111,7 @@ int main(void)
 
 		if (state.argv && state.argc > 0)
 			state.status = executeCmd(&state);
+		fflush(stdout);
 
 		free(state.argv);
 		state.argc = 0;

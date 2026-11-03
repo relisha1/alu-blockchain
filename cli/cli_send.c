@@ -60,9 +60,8 @@ static int handle_transaction_send(state_t *state, uint32_t amount,
 	EC_KEY_free(receiver);
 	if (!tx)
 	{
-		fprintf(stderr,
-			"%s: failed to create transaction (not enough coins?)\n",
-			state->argv[0]);
+		fprintf(stdout,
+			"Not enough coins in your wallet. Run 'mine' first.\n");
 		return ((state->status = EXIT_FAILURE));
 	}
 	if (!transaction_is_valid(tx, state->blockchain->unspent) ||

@@ -116,6 +116,5 @@ int block_is_valid(block_t const *block, block_t const *prev_block);
 void _blockchain_print(blockchain_t const *blockchain);
 void _blockchain_print_brief(blockchain_t const *blockchain);
 void _blockchain_destroy(blockchain_t *blockchain);
-block_t const *_genesis(void);
 
 #endif /* _BLOCKCHAIN_H_ */

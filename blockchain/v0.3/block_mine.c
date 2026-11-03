@@ -14,10 +14,8 @@ void block_mine(block_t *block)
 
 	while (1)
 	{
-		/* Update the block's info with the new nonce */
-		block->info.nonce = nonce;
-		/* Compute the hash of the block */
-		block_hash(block, hash);
+		/* Set the new nonce and compute the hash of the block */
+		block_hash_nonce(block, nonce, hash);
 		/* Check if the hash matches the difficulty */
 		if (hash_matches_difficulty(hash, block->info.difficulty))
 			break;

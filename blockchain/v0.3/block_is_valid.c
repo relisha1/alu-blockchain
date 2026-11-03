@@ -8,7 +8,7 @@
  * Return: 0 if continue else 1.
  * Author: Frank Onyema Orji.
  */
-int validate_tx(llist_node_t node, unsigned int idx, void *arg)
+static int validate_tx(llist_node_t node, unsigned int idx, void *arg)
 {
 	transaction_t *tx = node;
 	validation_vistor_t *visitor = arg;

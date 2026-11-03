@@ -2,6 +2,7 @@
 
 /**
  * _get_endianness - get the endianness of the running machine
+ *
  * Return: 1 for little endian, 2 for big endian
  */
 uint8_t _get_endianness(void)
@@ -13,6 +14,7 @@ uint8_t _get_endianness(void)
 
 /**
  * _swap_endian - reverse the byte order of a value in place
+ *
  * @p: address of the value
  * @size: size of the value in bytes
  */

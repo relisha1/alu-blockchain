@@ -7,7 +7,7 @@
  * Return: 1 if empty else 0.
  * Author: Frank Onyema Orji.
  */
-int is_empty(uint8_t *buf, size_t size)
+static int is_empty(uint8_t *buf, size_t size)
 {
 	return (!*buf && !memcmp(buf, buf + 1, size - 1));
 }

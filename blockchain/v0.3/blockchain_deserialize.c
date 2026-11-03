@@ -1,18 +1,8 @@
 #include "blockchain.h"
 
 #define CHECK_ENDIAN(x) (swap ? SWAPENDIAN(x) : (void)0)
-
-/**
- * read_all - read exactly len bytes
- * @fd: file descriptor
- * @buf: destination
- * @len: number of bytes
- * Return: 0 on success, -1 on failure
- */
-static int read_all(int fd, void *buf, size_t len)
-{
-	return (read(fd, buf, len) == (ssize_t)len ? 0 : -1);
-}
+#define read_all(fd, buf, len) \
+	(read(fd, buf, len) == (ssize_t)(len) ? 0 : -1)
 
 /**
  * read_tx_out - read one transaction output

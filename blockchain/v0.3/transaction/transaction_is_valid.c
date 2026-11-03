@@ -7,7 +7,7 @@
  * Return: 0 if continue else 1
  * Author: Frank Onyema Orji.
  */
-int match_unspent(llist_node_t node, void *arg)
+static int match_unspent(llist_node_t node, void *arg)
 {
 	unspent_tx_out_t *utxo = node;
 	tx_in_t *txi = arg;
@@ -24,7 +24,7 @@ int match_unspent(llist_node_t node, void *arg)
  * @arg: visitor
  * Return: 0 if continue else 1
  */
-int check_inputs(llist_node_t node, unsigned int idx, void *arg)
+static int check_inputs(llist_node_t node, unsigned int idx, void *arg)
 {
 	tx_in_t *txi = node;
 	validation_vistor_t *visitor = arg;
@@ -59,7 +59,7 @@ int check_inputs(llist_node_t node, unsigned int idx, void *arg)
  * @arg: visitor
  * Return: 0 if continue else 1
  */
-int check_outputs(llist_node_t node, unsigned int idx, void *arg)
+static int check_outputs(llist_node_t node, unsigned int idx, void *arg)
 {
 	tx_out_t *txo = node;
 	validation_vistor_t *visitor = arg;

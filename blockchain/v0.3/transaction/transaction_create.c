@@ -7,7 +7,8 @@
  * @arg: visitor_t struct
  * Return: 0 if continue else 1
  */
-int collect_sender_unspent(llist_node_t node, unsigned int idx, void *arg)
+static int collect_sender_unspent(llist_node_t node, unsigned int idx,
+	void *arg)
 {
 	visitor_t *visitor = arg;
 	unspent_tx_out_t *utx = node;
@@ -31,7 +32,7 @@ int collect_sender_unspent(llist_node_t node, unsigned int idx, void *arg)
  * @arg: inputs list
  * Return: 0 if continue else 1
  */
-int map_output_to_input(llist_node_t node, unsigned int idx, void *arg)
+static int map_output_to_input(llist_node_t node, unsigned int idx, void *arg)
 {
 	llist_t *inputs = arg;
 	unspent_tx_out_t *utx = node;
@@ -55,7 +56,7 @@ int map_output_to_input(llist_node_t node, unsigned int idx, void *arg)
  * @tx: transaction struct to populate
  * Return: tx struct
  */
-transaction_t *populate_tx(EC_KEY const *sender, visitor_t *visitor,
+static transaction_t *populate_tx(EC_KEY const *sender, visitor_t *visitor,
 	llist_t *all_unspent, uint8_t *sender_pub, uint8_t *receiver_pub,
 	transaction_t *tx)
 {

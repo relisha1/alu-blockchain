@@ -8,7 +8,7 @@
  * Return: 0 if success else 1.
  * Author: Frank Onyema Orji.
  */
-int hash_tx_ids(llist_node_t node, unsigned int idx, void *arg)
+static int hash_tx_ids(llist_node_t node, unsigned int idx, void *arg)
 {
 	memcpy(*(uint8_t **)arg, ((transaction_t *)node)->id, SHA256_DIGEST_LENGTH);
 	*(uint8_t **)arg += SHA256_DIGEST_LENGTH;
@@ -41,4 +41,20 @@ uint8_t *block_hash(block_t const *block,
 	sha256(_buf, len, hash_buf);
 	free(_buf);
 	return (hash_buf);
+}
+
+/**
+ * block_hash_nonce - set the nonce of a Block, then compute its hash
+ * @block: pointer to the Block
+ * @nonce: nonce to use
+ * @hash_buf: buffer to store the hash
+ * Return: pointer to hash_buf, or NULL on failure
+ */
+uint8_t *block_hash_nonce(block_t *block, uint64_t nonce,
+	uint8_t hash_buf[SHA256_DIGEST_LENGTH])
+{
+	if (!block)
+		return (NULL);
+	block->info.nonce = nonce;
+	return (block_hash(block, hash_buf));
 }

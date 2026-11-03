@@ -13,7 +13,7 @@
 
 #include <llist.h>
 #include "hblk_crypto.h"
-#include "provided/provided.h"
+#include "provided/endianness.h"
 #include "transaction/transaction.h"
 
 #define BLOCKCHAIN_DATA_MAX 1024
@@ -112,6 +112,8 @@ int block_is_valid(block_t const *block, block_t const *prev_block,
 		   llist_t *all_unspent);
 int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH],
 			    uint32_t difficulty);
+uint8_t *block_hash_nonce(block_t *block, uint64_t nonce,
+			  uint8_t hash_buf[SHA256_DIGEST_LENGTH]);
 void block_mine(block_t *block);
 uint32_t blockchain_difficulty(blockchain_t const *blockchain);
 

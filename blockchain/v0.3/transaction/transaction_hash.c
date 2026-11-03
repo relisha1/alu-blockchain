@@ -1,7 +1,7 @@
 #include "transaction.h"
 
-int hash_inputs(llist_node_t node, unsigned int idx, void *arg);
-int hash_outputs(llist_node_t node, unsigned int idx, void *arg);
+static int hash_inputs(llist_node_t node, unsigned int idx, void *arg);
+static int hash_outputs(llist_node_t node, unsigned int idx, void *arg);
 
 /**
  * transaction_hash - computes the ID (hash) of a transaction
@@ -46,7 +46,7 @@ uint8_t hash_buf[SHA256_DIGEST_LENGTH])
  * @arg: pointer to address to write to
  * Return: 0 if success else 1
  */
-int hash_inputs(llist_node_t node, unsigned int idx, void *arg)
+static int hash_inputs(llist_node_t node, unsigned int idx, void *arg)
 {
 	memcpy(*(uint8_t **)arg, node, SHA256_DIGEST_LENGTH * 3);
 	*(uint8_t **)arg += SHA256_DIGEST_LENGTH * 3;
@@ -61,7 +61,7 @@ int hash_inputs(llist_node_t node, unsigned int idx, void *arg)
  * @arg: pointer to address to write to
  * Return: 0 if success else 1
  */
-int hash_outputs(llist_node_t node, unsigned int idx, void *arg)
+static int hash_outputs(llist_node_t node, unsigned int idx, void *arg)
 {
 	memcpy(*(uint8_t **)arg, ((tx_out_t *)node)->hash, SHA256_DIGEST_LENGTH);
 	*(uint8_t **)arg += SHA256_DIGEST_LENGTH;

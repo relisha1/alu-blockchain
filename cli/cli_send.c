@@ -1,6 +1,32 @@
 #include "cli.h"
 
 /**
+ * parse_address - convert a public key written in hexadecimal into bytes
+ *
+ * @hex: public key as 130 hexadecimal characters
+ * @pub: buffer to store the 65 bytes of the key
+ *
+ * Return: 0 on success, -1 if @hex is not a valid public key
+ */
+static int parse_address(char const *hex, uint8_t pub[EC_PUB_LEN])
+{
+	unsigned int byte;
+	size_t i;
+
+	if (strlen(hex) != EC_PUB_LEN * 2)
+		return (-1);
+	for (i = 0; i < EC_PUB_LEN; i++)
+	{
+		if (sscanf(hex + (2 * i), "%2x", &byte) != 1)
+			return (-1);
+		pub[i] = (uint8_t)byte;
+	}
+	return (0);
+}
+
+
+
+/**
  * handle_transaction_send - program that attempts to create
  * and send a transaction based on provided receiver's public key,
  * amount to transfer, and state information
@@ -23,43 +49,30 @@ static int handle_transaction_send(state_t *state, uint32_t amount,
 	transaction_t *tx = NULL;
 
 	receiver = ec_from_pub(pub);
-
 	if (!receiver)
 	{
 		fprintf(stderr, "%s: %s: invalid receiver public key\n",
-			state->argv[0], state->argv[1]);
+			state->argv[0], state->argv[2]);
 		return ((state->status = EXIT_FAILURE));
 	}
-
-	tx = transaction_create(
-		state->wallet, receiver, amount, state->blockchain->unspent);
-
+	tx = transaction_create(state->wallet, receiver, amount,
+		state->blockchain->unspent);
+	EC_KEY_free(receiver);
 	if (!tx)
 	{
-		fprintf(stderr, "%s: failed to create transaction\n",
+		fprintf(stderr,
+			"%s: failed to create transaction (not enough coins?)\n",
 			state->argv[0]);
-		EC_KEY_free(receiver);
 		return ((state->status = EXIT_FAILURE));
 	}
-	if (!transaction_is_valid(tx, state->blockchain->unspent))
+	if (!transaction_is_valid(tx, state->blockchain->unspent) ||
+		llist_add_node(state->tx_pool, tx, ADD_NODE_REAR) == -1)
 	{
-		fprintf(stderr, "%s: invalid transaction\n",
-			state->argv[0]);
-		EC_KEY_free(receiver);
+		fprintf(stderr, "%s: invalid transaction\n", state->argv[0]);
 		transaction_destroy(tx);
 		return ((state->status = EXIT_FAILURE));
 	}
-	if (llist_add_node(state->tx_pool, tx, ADD_NODE_REAR) == -1)
-	{
-		fprintf(stdout, "Failed to add transaction to local transaction pool\n");
-		EC_KEY_free(receiver);
-		transaction_destroy(tx);
-		return ((state->status = EXIT_FAILURE));
-	}
-
 	fprintf(stdout, "Transaction added to local transaction pool\n");
-	EC_KEY_free(receiver);
-
 	return ((state->status = EXIT_SUCCESS));
 }
 
@@ -79,9 +92,7 @@ static int handle_transaction_send(state_t *state, uint32_t amount,
 int cli_send(state_t *state)
 {
 	uint8_t pub[EC_PUB_LEN] = {0};
-	size_t pub_index = 0;
 	unsigned long int amount = 0;
-	int nmatched = 0;
 	char *endptr = NULL;
 
 	if (state->argc > 3)
@@ -107,15 +118,11 @@ int cli_send(state_t *state)
 
 		return ((state->status = EXIT_FAILURE));
 	}
-	while (pub_index < EC_PUB_LEN)
+	if (parse_address(state->argv[2], pub) == -1)
 	{
-		nmatched = sscanf(
-			(state->argv[2] + (2 * pub_index)), "%02x",
-			(unsigned int *)(pub + pub_index));
-
-		if (nmatched == 0)
-			break;
-		pub_index += 1;
+		fprintf(stderr, "%s: %s: invalid address\n",
+			state->argv[0], state->argv[2]);
+		return ((state->status = EXIT_FAILURE));
 	}
 
 	return (handle_transaction_send(state, amount, pub));

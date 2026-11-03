@@ -1,129 +1,122 @@
 #include "cli.h"
 
 /**
- * transaction_is_invalid - program that checks if a transaction
- * in a node is invalid
+ * same_output - check if an unspent output is the one an input refers to
  *
- * @node: the transaction node to check
- * @arg: a pointer to unspent transaction list
+ * @node: unspent output
+ * @arg: transaction input
  *
- * Return: true if the transaction is invalid
+ * Return: 1 if it matches, 0 otherwise
  */
-
-static int transaction_is_invalid(llist_node_t node, void *arg)
+static int same_output(llist_node_t node, void *arg)
 {
-	transaction_t *transaction = node;
-	llist_t *unspent = arg;
+	unspent_tx_out_t *unspent = node;
+	tx_in_t *in = arg;
 
-	return (!transaction_is_valid(transaction, unspent));
+	return (!memcmp(unspent->out.hash, in->tx_out_hash,
+		SHA256_DIGEST_LENGTH));
 }
 
-
-
 /**
- * add_transaction - program that adds a transaction to the block's transaction list
+ * remove_spent - remove from a list the outputs spent by a transaction
  *
- * @node: the transaction node to be added
- * @idx: the index of the transaction (unused)
- * @arg: a pointer to the block where the transaction will be added
- *
- * Return: the result of adding the node to the block's transactions list
+ * @unspent: list of unspent outputs (nodes are not freed)
+ * @transaction: transaction that spends them
  */
-
-static int add_transaction(llist_node_t node,
-			   unsigned int idx __attribute__((unused)), void *arg)
+static void remove_spent(llist_t *unspent, transaction_t *transaction)
 {
-	transaction_t *transaction = node;
-	block_t *block = arg;
+	int i;
 
-	return (llist_add_node(block->transactions, transaction, ADD_NODE_REAR));
+	for (i = 0; i < llist_size(transaction->inputs); i++)
+		llist_remove_node(unspent, same_output,
+			llist_get_node_at(transaction->inputs, i), 0, NULL);
 }
 
-
-
 /**
- * update_utxo - program that updates the unspent transaction outputs
- * list after a new block is added
+ * pick_transactions - move valid transactions from the pool to a Block
  *
- * @state: the current state of the blockchain
- * @block: the new block added to the blockchain
- * @coinbase_tx: the coinbase transaction of the new block
+ * Transactions are checked one by one. Each accepted transaction removes
+ * the outputs it spends, so the same coins cannot be spent twice.
+ * Invalid transactions are deleted.
  *
- * Return: a pointer to the new unspent transaction output
+ * @state: CLI state
+ * @block: Block to fill
+ *
+ * Return: 0 on success, -1 on failure
  */
-
-static unspent_tx_out_t *update_utxo(state_t *state, block_t *block,
-				     transaction_t *coinbase_tx)
+static int pick_transactions(state_t *state, block_t *block)
 {
-	state->blockchain->unspent = update_unspent(
-		state->tx_pool, block->hash, state->blockchain->unspent);
+	llist_t *working = llist_create(MT_SUPPORT_FALSE);
+	transaction_t *transaction;
+	int i;
 
-	return (unspent_tx_out_create(
-			block->hash, coinbase_tx->id,
-			llist_get_head(coinbase_tx->outputs)));
+	if (!working)
+		return (-1);
+	for (i = 0; i < llist_size(state->blockchain->unspent); i++)
+		llist_add_node(working,
+			llist_get_node_at(state->blockchain->unspent, i),
+			ADD_NODE_REAR);
+
+	transaction = llist_pop(state->tx_pool);
+	while (transaction)
+	{
+		if (transaction_is_valid(transaction, working))
+		{
+			llist_add_node(block->transactions, transaction,
+				ADD_NODE_REAR);
+			remove_spent(working, transaction);
+		}
+		else
+			transaction_destroy(transaction);
+		transaction = llist_pop(state->tx_pool);
+	}
+	llist_destroy(working, 0, NULL);
+	return (0);
 }
 
-
-
 /**
- * cli_mine_process - program that mines a block and handles transactions
- * until a valid block is created or an error occurs
+ * cli_mine_process - fill, mine and add a Block to the Blockchain
  *
- * @state: the current state of the blockchain
- * @block: the block to be mined
- * @prev_block: the previous block in the chain
- * @coinbase_tx: the coinbase transaction for the new block
+ * @state: CLI state
+ * @block: Block to mine
+ * @prev_block: previous Block in the chain
+ * @coinbase_tx: coinbase transaction of the new Block
  *
- * Return: the status code indicating success or failure
+ * Return: EXIT_SUCCESS or EXIT_FAILURE
  */
-
 static int cli_mine_process(state_t *state, block_t *block,
 			    block_t *prev_block, transaction_t *coinbase_tx)
 {
-	unspent_tx_out_t *utxo = NULL;
+	llist_t *unspent;
 
-	while (!llist_remove_node(
-			state->tx_pool, transaction_is_invalid,
-			state->blockchain->unspent, 1,
-			(node_dtor_t)transaction_destroy))
-		;
-	llist_for_each(state->tx_pool, add_transaction, block);
-	block->info.difficulty = blockchain_difficulty(state->blockchain);
 	llist_add_node(block->transactions, coinbase_tx, ADD_NODE_FRONT);
+	if (pick_transactions(state, block) == -1)
+	{
+		block_destroy(block);
+		return ((state->status = EXIT_FAILURE));
+	}
+	block->info.difficulty = blockchain_difficulty(state->blockchain);
 	block_mine(block);
 
 	if (block_is_valid(block, prev_block, state->blockchain->unspent) != 0)
 	{
 		fprintf(stderr, "%s: failed to mine a valid block\n",
 			state->argv[0]);
-
-		while (llist_pop(block->transactions))
-			;
-		transaction_destroy(coinbase_tx);
 		block_destroy(block);
-
 		return ((state->status = EXIT_FAILURE));
 	}
 
-	utxo = update_utxo(state, block, coinbase_tx);
-
-	if (!utxo)
+	unspent = update_unspent(block->transactions, block->hash,
+		state->blockchain->unspent);
+	if (!unspent)
 	{
-		fprintf(stderr, "%s: failed to create UTXO\n",
+		fprintf(stderr, "%s: failed to update unspent outputs\n",
 			state->argv[0]);
-
-		while (llist_pop(block->transactions))
-			;
-		transaction_destroy(coinbase_tx);
 		block_destroy(block);
-
 		return ((state->status = EXIT_FAILURE));
 	}
-
-	while (llist_pop(state->tx_pool))
-		;
+	state->blockchain->unspent = unspent;
 	llist_add_node(state->blockchain->chain, block, ADD_NODE_REAR);
-	llist_add_node(state->blockchain->unspent, utxo, ADD_NODE_REAR);
 	fprintf(stdout, "Successfully mined a block\n");
 
 	return ((state->status = EXIT_SUCCESS));
@@ -163,22 +156,12 @@ int cli_mine(state_t *state)
 
 	coinbase_tx = coinbase_create(state->wallet, block->info.index);
 
-	if (!coinbase_tx)
+	if (!coinbase_tx || !coinbase_is_valid(coinbase_tx, block->info.index))
 	{
 		fprintf(stderr, "%s: failed to create coinbase transaction\n",
 			state->argv[0]);
-		block_destroy(block);
-
-		return ((state->status = EXIT_FAILURE));
-	}
-
-	if (!coinbase_is_valid(coinbase_tx, block->info.index))
-	{
-		fprintf(stderr, "%s: failed to create valid coinbase transaction\n",
-			state->argv[0]);
 		transaction_destroy(coinbase_tx);
 		block_destroy(block);
-
 		return ((state->status = EXIT_FAILURE));
 	}
 

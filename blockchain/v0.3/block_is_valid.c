@@ -20,7 +20,6 @@ static int validate_tx(llist_node_t node, unsigned int idx, void *arg)
 	}
 	else if (!transaction_is_valid(tx, visitor->all_unspent))
 	{
-		dprintf(2, "validate_tx: invalid idx %u\n", idx);
 		visitor->valid = 0;
 	}
 	return (0);
